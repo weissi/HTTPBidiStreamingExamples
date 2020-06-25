@@ -53,8 +53,7 @@ final class VaporEchoServer: ServerImplementation {
                         return writer.write(.end)
                     }
                 }
-            }, count: 0))
-            r.headers.remove(name: "content-length")
+            }))
             r.headers.add(name: "content-type", value: "application/octet-stream")
             return r
         }
