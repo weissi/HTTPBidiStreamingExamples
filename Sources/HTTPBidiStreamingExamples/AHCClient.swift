@@ -101,12 +101,17 @@ class PingPongyAHC: HTTPClientResponseDelegate {
         }
     }
 
+    func didReceiveError(task: HTTPClient.Task<Void>, _ error: Error) {
+        self.bodyDonePromise?.fail(error)
+    }
+
     func didReceiveBodyPart(task: HTTPClient.Task<Void>, _ buffer: ByteBuffer) -> EventLoopFuture<Void> {
         self.logger.debug("received '\(String(buffer: buffer))'")
 
         if self.pingPongCounter > 10 {
             self.logger.info("CLIENT: We did 10 rounds of back and forth, streaming is working, let's close")
             self.bodyDonePromise!.succeed(())
+            self.bodyDonePromise = nil
             return self.eventLoop.makeSucceededFuture(())
         }
 
