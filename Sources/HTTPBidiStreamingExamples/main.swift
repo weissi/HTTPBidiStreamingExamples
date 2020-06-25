@@ -70,6 +70,14 @@ func runThatThing(client: Client, server: Server, group: EventLoopGroup) throws 
     driverLogger[metadataKey: "driver"] = "client: \(client), server: \(server)"
     let dg = DispatchGroup()
 
+    func evaluateFinalResult(_ error: Error?) {
+        if let error = error {
+            driverLogger.error("Final result: ❌ ERROR: \(error)")
+        } else {
+            driverLogger.info("Final result: ✅ OK")
+        }
+    }
+
     switch client {
     case .urlSession:
         driverLogger.info("Running HTTP client")
@@ -77,11 +85,7 @@ func runThatThing(client: Client, server: Server, group: EventLoopGroup) throws 
         let pingPongerURLSession = PingPongyURLSession(url: url,
                                                        calloutQueue: DispatchQueue(label: "foo"),
                                                        logger: clientLogger) { error in
-            if let error = error {
-                driverLogger.error("Final result: ERROR: \(error)")
-            } else {
-                driverLogger.info("Final result: OK")
-            }
+            evaluateFinalResult(error)
             dg.leave()
         }
         pingPongerURLSession.start()
@@ -94,11 +98,7 @@ func runThatThing(client: Client, server: Server, group: EventLoopGroup) throws 
                                          group: group,
                                          calloutQueue: DispatchQueue(label: "foo"),
                                          logger: clientLogger) { error in
-            if let error = error {
-                driverLogger.error("Final result: ERROR: \(error)")
-            } else {
-                driverLogger.info("Final result: OK")
-            }
+            evaluateFinalResult(error)
             dg.leave()
         }
         pingPongerAHC.start()

@@ -70,6 +70,7 @@ class PingPongyAHC: HTTPClientResponseDelegate {
         self.httpClient.execute(request: request,
                                 delegate: self,
                                 eventLoop: .delegate(on: self.eventLoop),
+                                deadline: .now() + .seconds(5),
                                 logger: self.logger).futureResult.whenComplete { result in
                                     switch result {
                                     case .success:
