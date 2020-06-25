@@ -27,6 +27,7 @@ class PingPongyAHC: HTTPClientResponseDelegate {
     private let httpClient: HTTPClient
     private let eventLoop: EventLoop
     private let logger: Logger
+    private let enableVaporWorkaround: Bool
 
     // thread safety: all only on self.eventLoop
     private var bodyDonePromise: Optional<EventLoopPromise<Void>> = nil
@@ -40,6 +41,7 @@ class PingPongyAHC: HTTPClientResponseDelegate {
     }
 
     init(url: URL,
+         enableVaporWorkaround: Bool,
          group: EventLoopGroup,
          calloutQueue: DispatchQueue,
          logger: Logger,
@@ -49,6 +51,7 @@ class PingPongyAHC: HTTPClientResponseDelegate {
             logger[metadataKey: "client"] = "AsyncHTTPClient"
             return logger
         }()
+        self.enableVaporWorkaround = enableVaporWorkaround
         self.url = url
         self.completionHandler = completionHandler
         self.calloutQueue = DispatchQueue(label: "callout-q", target: calloutQueue)
@@ -63,7 +66,13 @@ class PingPongyAHC: HTTPClientResponseDelegate {
                                             self.logger.debug("received stream writer")
                                             assert(self.bodyDonePromise == nil)
                                             self.streamWriter = writer
-                                            _ = self.sendOne("1!")
+                                            if self.enableVaporWorkaround {
+                                                _ = self.sendOne("VAPOR").flatMap {
+                                                    self.sendOne("1!")
+                                                }
+                                            } else {
+                                                _ = self.sendOne("1!")
+                                            }
                                             self.bodyDonePromise = self.eventLoop.makePromise()
                                             return self.bodyDonePromise!.futureResult
                                          })

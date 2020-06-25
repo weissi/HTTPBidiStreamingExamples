@@ -27,6 +27,7 @@ class PingPongyURLSession: NSObject, URLSessionTaskDelegate, URLSessionDataDeleg
     private let completionHandler: (Error?) -> Void
     private let url: URL
     private let logger: Logger
+    private let enableVaporWorkaround: Bool
 
     // thread safety: all on self.sessionQueue
     private var meToBuffer: OutputStream? = nil
@@ -38,7 +39,12 @@ class PingPongyURLSession: NSObject, URLSessionTaskDelegate, URLSessionDataDeleg
         case pingPonging(counter: Int)
     }
 
-    init(url: URL, calloutQueue: DispatchQueue, logger: Logger, completionHandler: @escaping (Error?) -> Void) {
+    init(url: URL,
+         enableVaporWorkaround: Bool,
+         calloutQueue: DispatchQueue,
+         logger: Logger,
+         completionHandler: @escaping (Error?) -> Void) {
+        self.enableVaporWorkaround = enableVaporWorkaround
         self.url = url
         self.logger = {
             var logger = logger
@@ -86,6 +92,11 @@ class PingPongyURLSession: NSObject, URLSessionTaskDelegate, URLSessionDataDeleg
 
         let uploadTask = session.dataTask(with: request)
         uploadTask.resume()
+        if self.enableVaporWorkaround {
+            // Vapor only starts streaming if it sees a second `.body`.
+            self.sendOne("VAPOR")
+            usleep(100_000)
+        }
         self.sendOne("1!") // kick-start this
     }
 
