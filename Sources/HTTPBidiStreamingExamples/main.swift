@@ -83,7 +83,6 @@ func runThatThing(client: Client, server: Server, group: EventLoopGroup) throws 
         driverLogger.info("Running HTTP client")
         dg.enter()
         let pingPongerURLSession = PingPongyURLSession(url: url,
-                                                       enableVaporWorkaround: server == .vapor,
                                                        calloutQueue: DispatchQueue(label: "foo"),
                                                        logger: clientLogger) { error in
             evaluateFinalResult(error)
@@ -96,7 +95,6 @@ func runThatThing(client: Client, server: Server, group: EventLoopGroup) throws 
         driverLogger.info("Running AsyncHTTPClient client")
         dg.enter()
         let pingPongerAHC = PingPongyAHC(url: url,
-                                         enableVaporWorkaround: server == .vapor,
                                          group: group,
                                          calloutQueue: DispatchQueue(label: "foo"),
                                          logger: clientLogger) { error in
