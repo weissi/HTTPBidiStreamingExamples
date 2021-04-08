@@ -8,7 +8,7 @@ let package = Package(
     platforms: [.macOS("10.15"), /* Linux */],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.18.0"),
-        .package(url: "https://github.com/swift-server/async-http-client.git", .revision("2e6a64abb31fbc2d51da3919b0d8b35a6c7dc0b5")),
+        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.2.5"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.13.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
